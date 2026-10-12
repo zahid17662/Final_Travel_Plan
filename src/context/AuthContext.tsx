@@ -40,9 +40,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchCurrentUser = async () => {
     try {
+      const token = localStorage.getItem("tp_auth_token");
+      const headers: Record<string, string> = { Accept: "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch("/auth/me", {
         method: "GET",
-        headers: { Accept: "application/json" },
+        headers,
         credentials: "include",
       });
 
@@ -58,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (res.status === 401) {
         setUser(null);
         localStorage.removeItem(LOCAL_STORAGE_KEY);
+        localStorage.removeItem("tp_auth_token");
         return;
       }
 
@@ -102,6 +109,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         const userData: AuthUser = data.user || data;
         setUser(userData);
+        if (data.token) {
+          localStorage.setItem("tp_auth_token", data.token);
+        }
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(userData));
         return userData;
       }
@@ -152,6 +162,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const data = await res.json();
         const userData: AuthUser = data.user || data;
         setUser(userData);
+        if (data.token) {
+          localStorage.setItem("tp_auth_token", data.token);
+        }
         localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(userData));
         return userData;
       }
@@ -199,6 +212,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setUser(null);
       localStorage.removeItem(LOCAL_STORAGE_KEY);
+      localStorage.removeItem("tp_auth_token");
     }
   };
 
