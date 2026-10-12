@@ -22,9 +22,10 @@ const Label = ({ children, id }: { children: ReactNode; id?: string }) => <p id=
 
 function DestinationSearch({ selected, onAdd, error }: { selected: Place[]; onAdd: (p: Place) => void; error?: string }) {
   const listId = useId();
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(selected.length ? selected[selected.length - 1].name : "");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+
   const term = q.trim().toLowerCase();
   const results = useMemo(() => {
     const pool = places.filter((p) => !selected.some((s) => s.id === p.id));
@@ -33,8 +34,18 @@ function DestinationSearch({ selected, onAdd, error }: { selected: Place[]; onAd
   const custom = term && !places.some((p) => p.name.toLowerCase() === term) ? q.trim() : "";
   const total = results.length + (custom ? 1 : 0);
 
-  const add = (p: Place) => { onAdd(p); setQ(""); setActive(0); setOpen(true); };
-  const addCustom = () => add({ id: `custom-${custom.toLowerCase()}`, name: custom, sub: "Custom destination", type: "city" });
+  const add = (p: Place) => {
+    onAdd(p);
+    setQ(p.name);
+    setActive(0);
+    setOpen(false);
+  };
+  const addCustom = () => {
+    const customPlace: Place = { id: `custom-${custom.toLowerCase()}`, name: custom, sub: "Custom destination", type: "city" };
+    onAdd(customPlace);
+    setQ(custom);
+    setOpen(false);
+  };
   const choose = (i: number) => (i < results.length ? add(results[i]) : custom && addCustom());
 
   const onKey = (e: React.KeyboardEvent) => {
@@ -46,23 +57,80 @@ function DestinationSearch({ selected, onAdd, error }: { selected: Place[]; onAd
 
   return (
     <div className="relative">
-      <Input label="Where to?" role="combobox" aria-expanded={open} aria-controls={listId} aria-autocomplete="list" aria-activedescendant={open && total ? `${listId}-${active}` : undefined}
-        leading={<SearchIcon size={16} />} placeholder="Search a city, country or region" autoComplete="off" value={q} error={error}
-        onChange={(e) => { setQ(e.target.value); setActive(0); setOpen(true); }} onFocus={() => setOpen(true)} onBlur={() => setTimeout(() => setOpen(false), 120)} onKeyDown={onKey} />
+      <Input
+        label="Where to?"
+        role="combobox"
+        aria-expanded={open}
+        aria-controls={listId}
+        aria-autocomplete="list"
+        aria-activedescendant={open && total ? `${listId}-${active}` : undefined}
+        leading={<SearchIcon size={16} />}
+        placeholder="Search a city, country or region"
+        autoComplete="off"
+        value={q}
+        error={error}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setActive(0);
+          setOpen(true);
+        }}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 200)}
+        onKeyDown={onKey}
+        trailing={
+          q ? (
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={(e) => {
+                e.stopPropagation();
+                setQ("");
+                setOpen(true);
+              }}
+              className="rounded-full p-1 text-navy/40 hover:bg-navy/5 hover:text-navy cursor-pointer transition"
+              aria-label="Clear destination"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          ) : undefined
+        }
+      />
       {open && (
         <ul id={listId} role="listbox" aria-label="Destination suggestions" className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-y-auto rounded-xl border border-navy/10 bg-white p-1.5 shadow-pop">
           {!term && <li role="presentation" className="px-3 pb-1 pt-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-navy/45">Popular</li>}
           {results.map((p, i) => (
-            <li key={p.id} id={`${listId}-${i}`} role="option" aria-selected={i === active} onMouseDown={(e) => e.preventDefault()} onClick={() => add(p)} onMouseEnter={() => setActive(i)}
-              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 ${i === active ? "bg-surface" : ""}`}>
-              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ocean-100"><PinIcon size={14} /></span>
+            <li
+              key={p.id}
+              id={`${listId}-${i}`}
+              role="option"
+              aria-selected={i === active}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                add(p);
+              }}
+              onMouseEnter={() => setActive(i)}
+              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2 ${i === active ? "bg-surface" : "hover:bg-surface/60"}`}
+            >
+              <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ocean-100 text-ocean-700"><PinIcon size={14} /></span>
               <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-navy">{p.name}</span><span className="block truncate text-xs text-navy/55">{p.sub}</span></span>
               <Badge tone={typeTone[p.type]} className="capitalize">{p.type}</Badge>
             </li>
           ))}
           {custom && (
-            <li id={`${listId}-${results.length}`} role="option" aria-selected={active === results.length} onMouseDown={(e) => e.preventDefault()} onClick={addCustom} onMouseEnter={() => setActive(results.length)}
-              className={`cursor-pointer rounded-lg px-3 py-2 text-sm text-navy ${active === results.length ? "bg-surface" : ""}`}>
+            <li
+              id={`${listId}-${results.length}`}
+              role="option"
+              aria-selected={active === results.length}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                addCustom();
+              }}
+              onMouseEnter={() => setActive(results.length)}
+              className={`cursor-pointer rounded-lg px-3 py-2 text-sm text-navy ${active === results.length ? "bg-surface" : "hover:bg-surface/60"}`}
+            >
               {results.length === 0 && <span className="block text-xs text-navy/55">No matches for “{custom}”</span>}
               Add <strong>“{custom}”</strong> as typed
             </li>
@@ -145,7 +213,7 @@ function Inner({ onClose, initial }: { onClose: () => void; initial?: Place }) {
         </div>
 
         <section>
-          <DestinationSearch selected={dests} onAdd={(p) => setDests((l) => [...l, p])} error={submitted ? errors.dest : undefined} />
+          <DestinationSearch selected={dests} onAdd={(p) => setDests((l) => l.some((x) => x.id === p.id) ? l : [...l, p])} error={submitted ? errors.dest : undefined} />
           {dests.length ? (
             <div className="mt-3 flex flex-wrap gap-2" aria-label="Selected destinations">
               {dests.map((d) => <Chip key={d.id} icon={<PinIcon size={12} />} className="!pr-8" onRemove={() => setDests((l) => l.filter((x) => x.id !== d.id))}>{d.name}</Chip>)}
