@@ -32,7 +32,7 @@ export default function Home() {
   return (
     <div className="bg-white">
       <PlanTripModal open={planOpen} onClose={() => setPlanOpen(false)} />
-      <Hero variant="home" />
+      <Hero variant="home" onPlanTrip={() => setPlanOpen(true)} />
 
       <section className="mx-auto max-w-6xl px-6 pt-16">
         <div className="flex flex-wrap items-center justify-between gap-4">

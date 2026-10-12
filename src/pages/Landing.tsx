@@ -1,3 +1,4 @@
+import { useAuth } from "../context/AuthContext";
 import Hero from "../components/Hero";
 
 const features = [
@@ -13,6 +14,14 @@ const guides = [
 ];
 
 export default function Landing() {
+  let authContext: ReturnType<typeof useAuth> | null = null;
+  try {
+    authContext = useAuth();
+  } catch {
+    authContext = null;
+  }
+  const isLoggedIn = Boolean(authContext?.isAuthenticated);
+
   return (
     <div className="bg-white">
       <Hero />
@@ -56,7 +65,7 @@ export default function Landing() {
         <h2 className="text-4xl font-extrabold uppercase tracking-tight md:text-6xl">Your next trip starts here</h2>
         <p className="mt-5 text-sm text-navy/60">Free-to-use. Plan solo or with your whole crew.</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <a href="#/signup" className="rounded-full bg-navy px-7 py-3 text-xs font-semibold text-white hover:opacity-90">Start planning</a>
+          <a href={isLoggedIn ? "#/home" : "#/signup"} className="rounded-full bg-navy px-7 py-3 text-xs font-semibold text-white hover:opacity-90">Start planning</a>
           <a href="#/app" className="rounded-full border border-navy/15 px-7 py-3 text-xs font-semibold hover:bg-navy/5">Get the app →</a>
         </div>
       </section>
