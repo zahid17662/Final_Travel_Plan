@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Oswald:wght@400;500;600;700&display=swap');
+@import 'tailwindcss';
+@theme {
+  --color-navy: #1F2B5E;
+  --font-sans: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Oswald', sans-serif;
+  --color-ocean-100: #cfe6fb;
+  --color-ocean-500: #2b8fb5;
+  --color-surface: #f4f5f8;
+  --shadow-card: 0 1px 2px rgb(31 43 94 / 0.06), 0 10px 28px -10px rgb(31 43 94 / 0.18);
+  --color-navy-900: #141c3f;
+  --color-ocean-300: #7cc0dc;
+  --radius-card: 1rem;
+  --radius-panel: 1.25rem;
+  --spacing-gutter: 1.5rem;
+  --shadow-pop: 0 20px 50px -12px rgb(31 43 94 / 0.35);
+}
+body { font-family: var(--font-sans); color: #1F2B5E; }
+
+@layer base {
+  :focus-visible { outline: 2px solid var(--color-ocean-500); outline-offset: 2px; }
+  button:not(:disabled), a[href], [role="tab"], [role="menuitem"], summary { cursor: pointer; }
+  html { scroll-behavior: smooth; }
+}
+@keyframes tp-fade { from { opacity: 0 } to { opacity: 1 } }
+@keyframes tp-pop { from { opacity: 0; transform: translateY(12px) scale(0.97) } to { opacity: 1; transform: none } }
+@keyframes tp-rise { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: none } }
+.tp-fade { animation: tp-fade 0.2s ease-out both; }
+.tp-pop { animation: tp-pop 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.tp-rise { animation: tp-rise 0.3s ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .tp-fade, .tp-pop, .tp-rise { animation: none; }
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+.rte { min-height: 22rem; outline: none; line-height: 1.7; font-size: 0.95rem; }
+.rte:empty::before { content: attr(data-placeholder); color: rgb(31 43 94 / 0.38); pointer-events: none; }
+.rte h1 { font-family: var(--font-display); font-size: 2rem; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; margin: 1.2rem 0 0.5rem; }
+.rte h2 { font-size: 1.3rem; font-weight: 800; margin: 1.1rem 0 0.4rem; }
+.rte p, .rte div { margin: 0.35rem 0; }
+.rte ul { list-style: disc; padding-left: 1.4rem; margin: 0.4rem 0; }
+.rte ol { list-style: decimal; padding-left: 1.4rem; margin: 0.4rem 0; }
+.rte blockquote { border-left: 3px solid var(--color-ocean-500); padding-left: 1rem; margin: 0.8rem 0; color: rgb(31 43 94 / 0.75); }
+.rte img { display: block; max-width: 100%; border-radius: 0.9rem; margin: 0.8rem 0; }
